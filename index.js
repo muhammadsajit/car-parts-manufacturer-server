@@ -16,6 +16,7 @@ async function run() {
         const itemsCollection = client.db('car_parts_manufacturer').collection('items');
         const orderCollection = client.db('car_parts_manufacturer').collection('orders');
         const userCollection = client.db('car_parts_manufacturer').collection('users');
+        const reviewCollection = client.db('car_parts_manufacturer').collection('reviews');
         app.get('/items', async (req, res) => {
             const query = {};
             const cursor = itemsCollection.find(query);
@@ -36,11 +37,26 @@ async function run() {
             res.send(result)
 
         });
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+
+        });
         app.get('/orders', async (req, res) => {
             const user = req.query.userEmail;
             const query = { userEmail: user };
             const orders=await orderCollection.find(query).toArray();
             res.send(orders)
+
+
+
+        });
+        app.get('/reviews', async (req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result)
 
 
 
@@ -72,8 +88,7 @@ run().catch(console.dir)
 app.get('/', (req, res) => {
     res.send('Server is running')
 })
-//0WgaES3xRJmjmSdW
-//car_user
+
 app.listen(port, () => {
     console.log(`car app listening on port ${port}`)
 })
