@@ -14,6 +14,7 @@ async function run (){
 
         await client.connect();
         const itemsCollection=client.db('car_parts_manufacturer').collection('items');
+        const orderCollection=client.db('car_parts_manufacturer').collection('orders');
         app.get('/items',async(req,res)=>{
             const query={};
             const cursor= itemsCollection.find(query);
@@ -27,6 +28,13 @@ async function run (){
             const inventory = await itemsCollection.findOne(query);
             res.send(inventory);
          });
+
+         app.post('/orders',async(req,res)=>{
+           const order=req.body;
+           const result= await orderCollection.insertOne(order);
+           res.send(result)
+
+         })
         
 
 
