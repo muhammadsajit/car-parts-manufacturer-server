@@ -89,7 +89,29 @@ async function run() {
 
 
         });
-        app.put('/users/:email',async(req,res)=>{
+
+        app.get('/users',verifyJWT,async(req,res)=>{
+            const users=await usersCollection.find().toArray();
+            res.send(users)
+        })
+
+
+
+
+    app.put('/users/admin/:email',async(req,res)=>{
+            const email=req.params.email;
+            
+            const filter={ email:email };
+            
+            const updateDoc={
+                $set:{role:'admin'},
+            }
+            const result= await usersCollection.updateOne(filter,updateDoc);
+           
+
+            res.send(result) 
+        });
+    app.put('/users/:email',async(req,res)=>{
             const email=req.params.email;
             const user=req.body;
             const filter={ email:email };
@@ -101,7 +123,7 @@ async function run() {
             const token=jwt.sign({email:email},process.env.ACCESS_TOKEN_SECRET,{ expiresIn: 60 * 60 })
 
             res.send({result,token}) 
-          });
+        });
         app.put('/user/:email',async(req,res)=>{
             const email=req.params.email;
             const user=req.body;
