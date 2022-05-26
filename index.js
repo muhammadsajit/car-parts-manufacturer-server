@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt=require('jsonwebtoken');
 require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 5000;
@@ -16,7 +17,25 @@ async function run() {
         const itemsCollection = client.db('car_parts_manufacturer').collection('items');
         const orderCollection = client.db('car_parts_manufacturer').collection('orders');
         const userCollection = client.db('car_parts_manufacturer').collection('users');
+        const usersCollection = client.db('car_parts_manufacturer').collection('carUser');
         const reviewCollection = client.db('car_parts_manufacturer').collection('reviews');
+
+
+        function verifyJWT(req,res,next){
+            const authHeader=req.headers.authorization;
+            if(!authHeader){
+                return res.status(401).send({message:'unauthorized'})
+            }
+            const token=authHeader.split(' ')[1];
+            console.log('token',token)
+            jwt.verify(token,process.env.ACCESS_TOKEN_SECRET, function(err, decoded) {
+                if(err){
+                    return res.status(403).send({message:'forbidden access'})
+                }
+                req.decoded=decoded;
+                next();
+              });
+        }
         app.get('/items', async (req, res) => {
             const query = {};
             const cursor = itemsCollection.find(query);
@@ -30,6 +49,7 @@ async function run() {
             const purchase = await itemsCollection.findOne(query);
             res.send(purchase);
         });
+        
 
         app.post('/orders', async (req, res) => {
             const order = req.body;
@@ -43,11 +63,19 @@ async function run() {
             res.send(result);
 
         });
-        app.get('/orders', async (req, res) => {
+        app.get('/orders',verifyJWT, async (req, res) => {
             const user = req.query.userEmail;
+            const decodedEmail=req.decoded.email;
+            if(user===decodedEmail){
+
             const query = { userEmail: user };
             const orders=await orderCollection.find(query).toArray();
-            res.send(orders)
+             return res.send(orders)
+            }
+ 
+            else{
+                  res.status(403).send('forbidden access')
+            }
 
 
 
@@ -61,6 +89,19 @@ async function run() {
 
 
         });
+        app.put('/users/:email',async(req,res)=>{
+            const email=req.params.email;
+            const user=req.body;
+            const filter={ email:email };
+            const options={ upsert:true};
+            const updateDoc={
+                $set:user,
+            }
+            const result= await usersCollection.updateOne(filter,updateDoc,options);
+            const token=jwt.sign({email:email},process.env.ACCESS_TOKEN_SECRET,{ expiresIn: 60 * 60 })
+
+            res.send({result,token}) 
+          });
         app.put('/user/:email',async(req,res)=>{
             const email=req.params.email;
             const user=req.body;
@@ -72,7 +113,16 @@ async function run() {
             const result= await userCollection.updateOne(filter,updateDoc,options);
 
             res.send(result) 
-          })
+          });
+        //   app.get('/profiles',async(req,res)=>{
+        //       const query={};
+        //       console.log(query);
+        //       const cursor = userCollection.find(query);
+        //       const result = await cursor.toArray();
+        //       res.send(result);
+
+
+        //   })
 
 
 
