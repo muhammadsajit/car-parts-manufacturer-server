@@ -54,6 +54,12 @@ async function run() {
             const result = await cursor.toArray();
             res.send(result)
         });
+        app.get('/items', verifyJWT,verifyAdmin, async (req, res) => {
+            
+            
+            const result = await itemsCollection.find().toArray();
+            res.send(result)
+        });
         app.post('/items',verifyJWT,verifyAdmin, async (req, res) => {
             const newitem = req.body;
 
