@@ -6,6 +6,7 @@ const app = express();
 const stripe=require('stripe')(process.env.STRIPE_SECRET_KEY)
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { ObjectID } = require('bson');
 app.use(cors());
 app.use(express.json());
 
@@ -119,6 +120,22 @@ async function run() {
             const order= await orderCollection.findOne(query);
             res.send(order)
 
+        });
+        app.patch('/orders/:id',verifyJWT,async(req,res)=>{
+            const id= req.params.id;
+            const payment=req.body;
+            const filter={_id:ObjectId(id)};
+            const updatedDoc={
+                $set:{
+                    paid:true,
+                    transactionId:payment.transactionId,
+
+
+                }
+                
+            }
+            const updatedOrder= await orderCollection.updateOne(filter,updatedDoc)
+            res.send(updatedOrder);
         })
         app.get('/reviews', async (req, res) => {
             const query = {};
