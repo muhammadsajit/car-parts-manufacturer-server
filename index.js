@@ -42,6 +42,12 @@ async function run() {
             const result = await cursor.toArray();
             res.send(result)
         });
+        app.post('/items', async (req, res) => {
+            const newitem = req.body;
+
+            const result = await itemsCollection.insertOne(newitem);
+            res.send(result)
+        });
 
         app.get('/purchase/:id', async (req, res) => {
             const id = req.params.id;
@@ -96,7 +102,12 @@ async function run() {
         })
 
 
-
+     app.get('/admin/:email',async(req,res)=>{
+         const email=req.params.email;
+         const user=await usersCollection.findOne({email:email});
+         const isAdmin=user.role==='admin';
+         res.send({admin:isAdmin})
+     })
 
     app.put('/users/admin/:email', verifyJWT,async(req,res)=>{
             const email=req.params.email;
