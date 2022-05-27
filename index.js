@@ -66,6 +66,13 @@ async function run() {
             const result = await itemsCollection.insertOne(newitem);
             res.send(result)
         });
+        app.delete('/items/:id',verifyJWT,verifyAdmin, async (req, res) => {
+            const id= req.params.id;
+              const query ={_id:ObjectId(id)};
+
+            const result = await itemsCollection.deleteOne(query);
+            res.send(result)
+        });
 
         app.get('/purchase/:id', async (req, res) => {
             const id = req.params.id;
