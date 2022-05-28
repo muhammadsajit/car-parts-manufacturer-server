@@ -219,15 +219,23 @@ async function run() {
 
             res.send(result) 
           });
-        //   app.get('/profiles',async(req,res)=>{
-        //       const query={};
-        //       console.log(query);
-        //       const cursor = userCollection.find(query);
-        //       const result = await cursor.toArray();
-        //       res.send(result);
+          app.get('/profiles/:email', verifyJWT,async(req,res)=>{
+               const email=req.params.email;
+               const query={email:email}
+              const result = await userCollection.findOne(query);
+             
+              res.send(result);
 
 
-        //   })
+          })
+          app.get('/profiles',async(req,res)=>{
+             const result=await userCollection.find().toArray()
+
+             
+              res.send(result);
+
+
+          })
 
 
 
