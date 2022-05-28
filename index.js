@@ -128,6 +128,21 @@ async function run() {
             res.send(order)
 
         });
+        // app.delete('/orders/:email',async(req,res)=>{
+        //     const email=req.params.userEmail;
+        //      const query ={email:email}; 
+        //     const order= await orderCollection.deleteOne(query);
+        //     res.send(order)
+
+        // });
+        app.delete('/orders/:id',verifyJWT, async (req, res) => {
+            const id= req.params.id;
+              const query ={_id:ObjectId(id)};
+
+            const result = await orderCollection.deleteOne(query);
+            res.send(result)
+        });
+
         app.patch('/orders/:id',verifyJWT,async(req,res)=>{
             const id= req.params.id;
             const payment=req.body;
