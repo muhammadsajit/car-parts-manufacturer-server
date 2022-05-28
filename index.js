@@ -90,13 +90,20 @@ async function run() {
             res.send(result)
 
         });
+        app.get('/order', async (req, res) => {
+            const query = {};
+            const cursor = orderCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+
+        });
         app.post('/reviews', async (req, res) => {
             const review = req.body;
             const result = await reviewCollection.insertOne(review);
             res.send(result);
 
         });
-        app.get('/orders',verifyJWT, async (req, res) => {
+        app.get('/orders',verifyJWT,async (req, res) => {
             const user = req.query.userEmail;
             const decodedEmail=req.decoded.email;
             if(user===decodedEmail){
